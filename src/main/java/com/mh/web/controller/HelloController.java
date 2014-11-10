@@ -3,7 +3,11 @@ package com.mh.web.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -44,11 +48,12 @@ public class HelloController {
 	@RequestMapping(value = {"/login"}, method = RequestMethod.GET)
 	public ModelAndView login(
 			@RequestParam(value="error",required=false) String error,
-			@RequestParam(value="logout",required=false) String logout
+			@RequestParam(value="logout",required=false) String logout,
+			HttpServletRequest request
 			) {
 		ModelAndView model = new ModelAndView();
 		if (error != null) {
-			model.addObject("error", "Invalid username and password.");
+			model.addObject("error", getErrorMessage(request, "SPRING_SECURITY_LAST_EXCEPTION"));
 		}
 		if (logout != null) {
 			model.addObject("msg", "You've been logged out successfully.");
@@ -67,6 +72,19 @@ public class HelloController {
 		}
 		model.setViewName("403");
 		return model;
+	}
+	
+	private String getErrorMessage(HttpServletRequest request, String key) {
+		Exception exception = (Exception)request.getSession().getAttribute(key);
+		String error = "";
+		if (exception instanceof BadCredentialsException) {
+			error = "Invalid username and password.";
+		} else if (exception instanceof LockedException) {
+			error = exception.getMessage();
+		} else {
+			error = "Invalid username and password.";
+		}
+		return error;
 	}
 
 }

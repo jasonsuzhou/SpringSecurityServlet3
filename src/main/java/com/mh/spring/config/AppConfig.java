@@ -11,7 +11,7 @@ import org.springframework.web.servlet.view.JstlView;
 
 @EnableWebMvc
 @Configuration
-@ComponentScan({ "com.mh.web.*" })
+@ComponentScan({ "com.mh.*" })
 @Import({ SecurityConfig.class })
 public class AppConfig {
 	
